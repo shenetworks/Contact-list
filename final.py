@@ -1,7 +1,8 @@
 import json
 from os import path
+import input_validation 
 
-phonebook = [{"Name": "Serena", "Phone": "1112223333"}, {"Name":"Steve", "Phone": "0009998888"}]
+phonebook = [{"First": "Serena", "Last": "DiPenti", "Middle": "M", "Phone": "1112223333"}, {"First": "Steve", "Last": "Smith", "Middle": "J", "Phone": "1112224444"}]
 
 filename = "phonebook.json"
 
@@ -10,43 +11,70 @@ if path.isfile(filename) is False:
         json.dump(phonebook, phonebook_json_initial)
 
 
+# add a new entry
 def add_person():
-    name = input("Enter the persons full name: ")
-    phone_number = input("Enter the persons phone number: ")
-    new_entry = {"Name": name, "Phone": phone_number}
+    #user input validation 
+    name = input_validation.name_validation()
+    new_entry = name
+    phone = input_validation.phone_validation()
+    new_entry['Phone'] = phone
+    
+    #adding the new entry to the JSON document
     data = json.load(open('phonebook.json'))
     data.append(new_entry)
     with open('phonebook.json', 'w') as phonebook_json:
         json.dump(data, phonebook_json)
-    print(f"{name} has been added to the phonebook")
+    
+    #confirming contact has been successfully added
+    print("Contact has been added to the phonebook")  #update this to include the firstname formatting
 
+#delete an entry by name
 def del_person_name():
+    #user input validation
+    name = input_validation.name_validation()
+    
+    # format {"First": "Serena", "Last": "DiPenti", "Middle": "M"}
+    # assigning key values to variables
+    first = name["First"]
+    last = name["Last"]
+    #loading json file
     data = json.load(open('phonebook.json'))
-    name = input("Enter name of contact you would like to delete: ")
+    # matching user input with existing contact data in json
     for entry in range(len(data)):
-        if data[entry]["Name"] == str(name):
-            del data[entry]    
-            with open('phonebook.json', 'w') as phonebook_json:
-                json.dump(data, phonebook_json)
-                print(f"{name} has been deleted to the phonebook")
+        if data[entry]["Last"] == str(last) and data[entry]["First"] == str(first):
+            confirm = input(f"Would you like to delete {entry} Y/N: ") # needs to print out whole dictonary to confirm 
+            if confirm == "Y":
+                del data[entry]    
+                with open('phonebook.json', 'w') as phonebook_json:
+                    json.dump(data, phonebook_json)
+                    print(f"{first} has been deleted to the phonebook")
+                    break
+            else:
+                print("Exiting.")
                 break
     else:
-        print(f"{name} is not in the phonebook")
+        print(f"{first} {last} is not in the phonebook")
 
-
+#delete an entry by phone number
 def del_person_phone():
-    data = json.load(open('phonebook.json'))
-    number = input("Enter phone number of contact you would like to delete: ")
-    for entry in range(len(data)):
-        if data[entry]["Phone"] == str(number):
-            del data[entry]    
-            with open('phonebook.json', 'w') as phonebook_json:
-                json.dump(data, phonebook_json)
-                print(f"{number} has been deleted to the phonebook")
-                break
-    else:
-        print(f"{number} is not in the phonebook")
+    #user input validation
+    phone = input_validation.phone_validation()
 
+    data = json.load(open('phonebook.json'))
+    # number = input("Enter phone number of contact you would like to delete: ")
+    for entry in range(len(data)):
+        if data[entry]["Phone"] == str(phone):
+            confirm = input(f'Would you like to delete {phone} ? Y/N: ') # add name of who the number belongs to
+            if confirm == "Y":
+                del data[entry]    
+                with open('phonebook.json', 'w') as phonebook_json:
+                    json.dump(data, phonebook_json)
+                    print(f"{phone} has been deleted to the phonebook")
+                    break
+    else:
+        print(f"{phone} is not in the phonebook")
+
+#list all current saved entries
 def list_entries():
     with open('phonebook.json') as phonebook_json:
         phonebook_list = json.load(phonebook_json)
